@@ -1,0 +1,5 @@
+*.h5 
+dataset 
+surveys
+.idea 
+__pycache__ 
