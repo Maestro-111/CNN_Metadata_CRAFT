@@ -90,11 +90,11 @@ def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_n
 
 
     CNN_net = CNN(num_classes, dim)
-    history = CNN_net.train(train_dataset,validation_dataset,epochs=15)
+    history = CNN_net.train(train_dataset,validation_dataset,epochs=45)
     CNN_net.summary()
     CNN_net.plot_training_hist(history, '3-layers CNN', ['red', 'orange'], ['blue', 'green'])
     CNN_net.evaluate_model(test_dataset,class_names)
     CNN_net.save('model.h5')
 
 
-pipeline(delete=True,process=True,aug=True,train=True,dim=(224,224,3),source='C:\metadata_craft') # 224*224, image is rgb
+pipeline(delete=False,process=False,aug=False,train=True,dim=(224,224,3),source='C:\metadata_craft') # 224*224, image is rgb

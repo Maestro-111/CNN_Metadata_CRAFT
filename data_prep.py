@@ -15,8 +15,9 @@ def augementation(images_dir,max_bound,output_dir):
     # Create an ImageDataGenerator for augmentation
     datagen = ImageDataGenerator(
         featurewise_center = True,
+        samplewise_center=True,
         rotation_range=30,  # rotate images by 20 degrees
-        width_shift_range=0.2,  # shift images horizontally by 20%
+        width_shift_range=0.3,  # shift images horizontally by 20%
         height_shift_range=0.2,  # shift images vertically by 20%
         horizontal_flip=True,
         vertical_flip=True,
