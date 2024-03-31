@@ -178,7 +178,9 @@ class CNN(neural_net_mixin):
             Dense(128, activation='relu'),
             Dropout(0.5),
             Dense(32, activation='relu'),
-            #Dropout(0.5),
+            Dropout(0.5),
+            Dense(16, activation='relu'),
+            Dropout(0.5),
             BatchNormalization(),
             Dense(num_classes,activation='softmax')
         ])

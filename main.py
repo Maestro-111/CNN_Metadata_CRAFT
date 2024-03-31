@@ -25,11 +25,11 @@ def process_data(source:str,aug:bool,factor=6):
     if aug:
         augementation('dataset/train/key_plates', 1100, 'surveys')
         augementation('dataset/test/key_plates', 100, 'surveys')
-        augementation('dataset/validation/key_plates', 300, 'surveys')
+        augementation('dataset/validation/key_plates', 400, 'surveys')
 
-        augementation('dataset/train/other', 1100, 'surveys')
-        augementation('dataset/test/other', 100, 'surveys')
-        augementation('dataset/validation/other', 300, 'surveys')
+        augementation('dataset/train/other', 3000, 'surveys')
+        augementation('dataset/test/other', 200, 'surveys')
+        augementation('dataset/validation/other', 600, 'surveys')
 
 
 
@@ -90,11 +90,11 @@ def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_n
 
 
     CNN_net = CNN(num_classes, dim)
-    history = CNN_net.train(train_dataset,validation_dataset,epochs=45)
+    history = CNN_net.train(train_dataset,validation_dataset,epochs=15)
     CNN_net.summary()
     CNN_net.plot_training_hist(history, '3-layers CNN', ['red', 'orange'], ['blue', 'green'])
     CNN_net.evaluate_model(test_dataset,class_names)
     CNN_net.save('model.h5')
 
 
-pipeline(delete=False,process=False,aug=False,train=True,dim=(224,224,3),source='C:\metadata_craft') # 224*224, image is rgb
+pipeline(delete=True,process=False,aug=False,train=False,dim=(224,224,3),source='C:\metadata_craft') # 224*224, image is rgb
