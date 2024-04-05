@@ -17,22 +17,18 @@ from tensorflow import keras
 
 #'C:\metadata_craft'
 
+TARGET = 'key_plates'
+
 def process_data(source:str,aug:bool,factor=6):
 
     save_to_dataset(data_dir=source)
     sharp_and_res(data_dir = "dataset",factor=factor)
 
     if aug:
-        augementation('dataset/train/key_plates', 1100, 'surveys')
-        augementation('dataset/test/key_plates', 100, 'surveys')
-        augementation('dataset/validation/key_plates', 400, 'surveys')
+        augementation(f'dataset/train/{TARGET}', 1700, 'surveys')
+        augementation(f'dataset/validation/{TARGET}', 400, 'surveys')
 
-        augementation('dataset/train/other', 3000, 'surveys')
-        augementation('dataset/test/other', 200, 'surveys')
-        augementation('dataset/validation/other', 600, 'surveys')
-
-
-
+    print("Data set has been created\n")
 
 
 def dataset(train_path,val_path,test_path,dim:tuple,color_mode:str):
@@ -51,12 +47,12 @@ def delete_data(classes=['key_plates', 'other']):
             delete_files_in_directory(directory_path=path)
 
 
-def pipeline(delete=False,process=False,aug=False,train=False,dim=tuple([]),source='C:\metadata_craft'):
+def pipeline(delete=False,process=False,aug=False,train=False,dim=tuple([]),factor=6,source='C:\metadata_craft'):
 
     if delete:
         delete_data()
     if process:
-        process_data(source=source,aug=aug)
+        process_data(source=source,aug=aug,factor=factor)
 
     if train:
 
@@ -88,13 +84,14 @@ def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_n
 
     """
 
+    print("Started Training\n")
 
     CNN_net = CNN(num_classes, dim)
     history = CNN_net.train(train_dataset,validation_dataset,epochs=15)
     CNN_net.summary()
     CNN_net.plot_training_hist(history, '3-layers CNN', ['red', 'orange'], ['blue', 'green'])
-    CNN_net.evaluate_model(test_dataset,class_names)
+    CNN_net.evaluate_model(test_dataset,class_names,target_name=TARGET)
     CNN_net.save('model.h5')
 
 
-pipeline(delete=True,process=False,aug=False,train=False,dim=(224,224,3),source='C:\metadata_craft') # 224*224, image is rgb
+pipeline(delete=True,process=True,aug=True,train=True,dim=(224,224,3),factor=7,source='C:\metadata_craft') # 224*224, image is rgb

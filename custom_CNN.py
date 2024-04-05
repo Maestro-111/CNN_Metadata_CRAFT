@@ -174,14 +174,18 @@ class CNN(neural_net_mixin):
             Conv2D(128, 4, padding='same', activation='relu'),
             MaxPooling2D(),
             BatchNormalization(),
+            Conv2D(264, 4, padding='same', activation='relu'),
+            MaxPooling2D(),
+            BatchNormalization(),
             Flatten(),
+            Dense(264, activation='relu'),
+            Dropout(0.5),
             Dense(128, activation='relu'),
+            Dropout(0.5),
+            Dense(64, activation='relu'),
             Dropout(0.5),
             Dense(32, activation='relu'),
             Dropout(0.5),
-            Dense(16, activation='relu'),
-            Dropout(0.5),
-            BatchNormalization(),
             Dense(num_classes,activation='softmax')
         ])
 
@@ -200,7 +204,7 @@ class CNN(neural_net_mixin):
     def summary(self):
         print(self.model.summary())
 
-    def evaluate_model(self, test_dataset, class_names):
+    def evaluate_model(self, test_dataset, class_names,  target_name = 'key_plates'):
         test_loss, test_acc = self.model.evaluate(test_dataset)
 
         print(f'test accuracy : {test_acc}')
@@ -226,12 +230,12 @@ class CNN(neural_net_mixin):
 
 
 
-        key_plates_index = class_names.index('key_plates')
+        key_plates_index = class_names.index(target_name)
         recall_key_plates = recall_score(y_true, y_pred, labels=[key_plates_index], average=None)[0]
 
         test_f1 = f1_score(y_true, y_pred, average="macro")
 
         print(f'test f1-score : {test_f1}')
-        print(f'test recall score for key plates: {recall_key_plates}')
+        print(f'test recall score for {target_name}: {recall_key_plates}')
         self.plot_cm(y_true, y_pred, class_names)
         plt.show()
