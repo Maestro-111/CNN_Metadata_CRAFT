@@ -8,6 +8,11 @@ from keras.layers import Conv2D
 from keras.layers import Dropout
 from keras.layers import MaxPooling2D
 from keras.layers import Rescaling
+from keras import layers
+from keras import models
+from keras.layers import Activation
+
+
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import f1_score
 import numpy as np
@@ -160,34 +165,83 @@ class CNN(neural_net_mixin):
     CNN neural net
     """
 
-    def __init__(self,num_classes,input_shape:tuple):
-        self.model = keras.Sequential([
-            Rescaling(1. / 255, input_shape=input_shape),
-            Conv2D(16, 4, padding='same', activation='relu'),
-            MaxPooling2D(),
-            BatchNormalization(),
-            Conv2D(32, 4, padding='same', activation='relu'),
-            MaxPooling2D(),
-            BatchNormalization(),
-            Conv2D(64, 4, padding='same', activation='relu'),
-            MaxPooling2D(),
-            Conv2D(128, 4, padding='same', activation='relu'),
-            MaxPooling2D(),
-            BatchNormalization(),
-            Conv2D(264, 4, padding='same', activation='relu'),
-            MaxPooling2D(),
-            BatchNormalization(),
-            Flatten(),
-            Dense(264, activation='relu'),
-            Dropout(0.5),
-            Dense(128, activation='relu'),
-            Dropout(0.5),
-            Dense(64, activation='relu'),
-            Dropout(0.5),
-            Dense(32, activation='relu'),
-            Dropout(0.5),
-            Dense(num_classes,activation='softmax')
-        ])
+    def __init__(self,num_classes:int,input_shape:tuple,recall_param_name:str,recall_param_index:int):
+
+        self.recall_param_name = recall_param_name
+        self.recall_param_index = recall_param_index
+
+        img_input = layers.Input(shape=input_shape)
+        x = Rescaling(1.0 / 255)(img_input)
+
+        # Block 1
+        x = Conv2D(32, (4, 4),
+                    padding='same',
+                    name='block1_conv1')(img_input)
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = Dropout(0.6)(x)
+
+        x = Conv2D(32, (4, 4),
+                    padding='same',
+                    name='block1_conv2')(x)
+
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = MaxPooling2D((3, 3), strides=(2, 2), name='block1_pool')(x)
+        x = Dropout(0.6)(x)
+
+
+        # Block 2
+        x = Conv2D(64, (4, 4),
+                    padding='same',
+                    name='block2_conv1')(x)
+
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = Dropout(0.6)(x)
+
+        x = Conv2D(64, (4, 4),
+                    padding='same',
+                    name='block2_conv2')(x)
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = MaxPooling2D((3, 3), strides=(2, 2), name='block2_pool')(x)
+        x = Dropout(0.6)(x)
+
+
+        # Block 3
+        x = Conv2D(128, (4, 4),
+                    padding='same',
+                    name='block3_conv1')(x)
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = MaxPooling2D((3, 3), strides=(2, 2), name='block5_pool')(x)
+        x = Dropout(0.6)(x)
+
+        ##### regualr layers
+
+        x = Flatten(name='flatten')(x)
+
+        x = Dense(128,name='fc1')(x)
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = Dropout(0.6)(x)  # Adding Dropout after fc1 layer
+
+        x = Dense(128, name='fc2')(x)
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = Dropout(0.6)(x)  # Adding Dropout after fc2 layer
+
+        x = Dense(num_classes, activation='softmax', name='predictions')(x)
+
+        inputs = img_input
+
+        self.model = models.Model(inputs, x, name='vgg19-custom')
 
         self.model.compile(
             optimizer='adam',
@@ -195,16 +249,19 @@ class CNN(neural_net_mixin):
             metrics=['accuracy'])
 
 
-    def train(self, train, validation,batch_size=20, epochs=10):
+    def train(self, train, validation, batch_size=30, epochs=10):
+        print("Started Training")
 
         h = self.model.fit(train, validation_data=validation, batch_size=batch_size, epochs=epochs)
+
         print("Done Training")
+
         return h
 
     def summary(self):
         print(self.model.summary())
 
-    def evaluate_model(self, test_dataset, class_names,  target_name = 'key_plates'):
+    def evaluate_model(self, test_dataset, class_names):
         test_loss, test_acc = self.model.evaluate(test_dataset)
 
         print(f'test accuracy : {test_acc}')
@@ -230,12 +287,12 @@ class CNN(neural_net_mixin):
 
 
 
-        key_plates_index = class_names.index(target_name)
-        recall_key_plates = recall_score(y_true, y_pred, labels=[key_plates_index], average=None)[0]
+        target_index = class_names.index(self.recall_param_name)
+        recall_target = recall_score(y_true, y_pred, labels=[target_index], average=None)[0]
 
         test_f1 = f1_score(y_true, y_pred, average="macro")
 
         print(f'test f1-score : {test_f1}')
-        print(f'test recall score for {target_name}: {recall_key_plates}')
+        print(f'test recall score for {self.recall_param_name}: {recall_target}')
         self.plot_cm(y_true, y_pred, class_names)
         plt.show()

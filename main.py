@@ -17,7 +17,11 @@ from tensorflow import keras
 
 #'C:\metadata_craft'
 
-TARGET = 'key_plates'
+TARGET_NAME = 'key_plates'
+TARGET_INDEX = 0
+DIM = (224,224,3)
+FACTOR = 7
+SOURCE = 'C:\metadata_craft'
 
 def process_data(source:str,aug:bool,factor=6):
 
@@ -25,8 +29,8 @@ def process_data(source:str,aug:bool,factor=6):
     sharp_and_res(data_dir = "dataset",factor=factor)
 
     if aug:
-        augementation(f'dataset/train/{TARGET}', 1700, 'surveys')
-        augementation(f'dataset/validation/{TARGET}', 400, 'surveys')
+        augementation(f'dataset/train/{TARGET_NAME}', 1700, 'surveys')
+        augementation(f'dataset/validation/{TARGET_NAME}', 400, 'surveys')
 
     print("Data set has been created\n")
 
@@ -47,19 +51,24 @@ def delete_data(classes=['key_plates', 'other']):
             delete_files_in_directory(directory_path=path)
 
 
-def pipeline(delete=False,process=False,aug=False,train=False,dim=tuple([]),factor=6,source='C:\metadata_craft'):
+
+
+
+
+
+def pipeline(delete=False,process=False,aug=False,train=False):
 
     if delete:
         delete_data()
     if process:
-        process_data(source=source,aug=aug,factor=factor)
+        process_data(source=SOURCE,aug=aug,factor=FACTOR)
 
     if train:
 
-        if not dim:
+        if not DIM or len(DIM) < 3:
             raise ValueError
 
-        width,height,length = dim
+        width,height,length = DIM
 
         if length == 1:
             color_mode = 'grayscale'
@@ -74,24 +83,22 @@ def pipeline(delete=False,process=False,aug=False,train=False,dim=tuple([]),fact
             color_mode)
 
 
-        train_model_and_save(train_dataset, validation_dataset, test_dataset, class_names, num_classes, dim)
+        train_model_and_save(train_dataset, validation_dataset, test_dataset, class_names, num_classes)
 
 
-def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_names, num_classes, dim):
+def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_names, num_classes):
 
     """
     train and eval CNN net
 
     """
 
-    print("Started Training\n")
-
-    CNN_net = CNN(num_classes, dim)
+    CNN_net = CNN(num_classes, DIM, TARGET_NAME,TARGET_INDEX)
     history = CNN_net.train(train_dataset,validation_dataset,epochs=15)
     CNN_net.summary()
     CNN_net.plot_training_hist(history, '3-layers CNN', ['red', 'orange'], ['blue', 'green'])
-    CNN_net.evaluate_model(test_dataset,class_names,target_name=TARGET)
+    CNN_net.evaluate_model(test_dataset,class_names)
     CNN_net.save('model.h5')
 
 
-pipeline(delete=True,process=True,aug=True,train=True,dim=(224,224,3),factor=7,source='C:\metadata_craft') # 224*224, image is rgb
+pipeline(delete=True,process=True,aug=True,train=True)
