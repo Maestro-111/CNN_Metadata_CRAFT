@@ -15,13 +15,13 @@ import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
-#'C:\metadata_craft'
 
 TARGET_NAME = 'key_plates'
-TARGET_INDEX = 0
 DIM = (224,224,3)
 FACTOR = 7
 SOURCE = 'C:\metadata_craft'
+MODEL_NAME = 'model3'
+EPOCHS = 12
 
 def process_data(source:str,aug:bool,factor=6):
 
@@ -49,10 +49,6 @@ def delete_data(classes=['key_plates', 'other']):
         for type_image in classes:
             path = f'dataset/{type_dir}/{type_image}'
             delete_files_in_directory(directory_path=path)
-
-
-
-
 
 
 
@@ -93,12 +89,13 @@ def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_n
 
     """
 
-    CNN_net = CNN(num_classes, DIM, TARGET_NAME,TARGET_INDEX)
-    history = CNN_net.train(train_dataset,validation_dataset,epochs=15)
+    CNN_net = CNN(num_classes, DIM, TARGET_NAME)
+    history = CNN_net.train(train_dataset,validation_dataset,epochs=EPOCHS)
     CNN_net.summary()
     CNN_net.plot_training_hist(history, '3-layers CNN', ['red', 'orange'], ['blue', 'green'])
     CNN_net.evaluate_model(test_dataset,class_names)
-    CNN_net.save('model.h5')
+    CNN_net.save(f'{MODEL_NAME}.h5')
 
 
 pipeline(delete=True,process=True,aug=True,train=True)
+

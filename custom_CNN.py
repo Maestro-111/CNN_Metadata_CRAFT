@@ -70,6 +70,8 @@ def create_dataset(directory_train, directory_valid, directory_test, dim, color_
     return train_dataset, validation_dataset, test_dataset, class_names, num_classes
 
 
+
+
 def make_confusion_matrix(cm, percent=False, categories=None, cmap=plt.cm.Blues, threshold=None, low_color='green', high_color='orange'):
     fig, ax = plt.subplots(figsize=(8, 6))
 
@@ -165,10 +167,9 @@ class CNN(neural_net_mixin):
     CNN neural net
     """
 
-    def __init__(self,num_classes:int,input_shape:tuple,recall_param_name:str,recall_param_index:int):
+    def __init__(self,num_classes:int,input_shape:tuple,recall_param_name:str):
 
         self.recall_param_name = recall_param_name
-        self.recall_param_index = recall_param_index
 
         img_input = layers.Input(shape=input_shape)
         x = Rescaling(1.0 / 255)(img_input)
@@ -180,7 +181,7 @@ class CNN(neural_net_mixin):
 
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x)
+        x = Dropout(0.5)(x)
 
         x = Conv2D(32, (4, 4),
                     padding='same',
@@ -190,7 +191,7 @@ class CNN(neural_net_mixin):
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         x = MaxPooling2D((3, 3), strides=(2, 2), name='block1_pool')(x)
-        x = Dropout(0.6)(x)
+        x = Dropout(0.5)(x)
 
 
         # Block 2
@@ -201,7 +202,7 @@ class CNN(neural_net_mixin):
 
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x)
+        x = Dropout(0.5)(x)
 
         x = Conv2D(64, (4, 4),
                     padding='same',
@@ -210,7 +211,7 @@ class CNN(neural_net_mixin):
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         x = MaxPooling2D((3, 3), strides=(2, 2), name='block2_pool')(x)
-        x = Dropout(0.6)(x)
+        x = Dropout(0.4)(x)
 
 
         # Block 3
@@ -220,8 +221,29 @@ class CNN(neural_net_mixin):
 
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = MaxPooling2D((3, 3), strides=(2, 2), name='block5_pool')(x)
-        x = Dropout(0.6)(x)
+        x = MaxPooling2D((3, 3), strides=(2, 2), name='block3_pool1')(x)
+        x = Dropout(0.4)(x)
+
+
+        # Block 4
+        x = Conv2D(256, (4, 4),
+                    padding='same',
+                    name='block4_conv1')(x)
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = Dropout(0.5)(x)
+
+
+        x = Conv2D(256, (4, 4),
+                    padding='same',
+                    name='block4_conv2')(x)
+
+        x = BatchNormalization()(x)
+        x = Activation('relu')(x)
+        x = MaxPooling2D((3, 3), strides=(2, 2), name='block4_pool')(x)
+        x = Dropout(0.5)(x)
+
 
         ##### regualr layers
 
@@ -230,12 +252,12 @@ class CNN(neural_net_mixin):
         x = Dense(128,name='fc1')(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x)  # Adding Dropout after fc1 layer
+        x = Dropout(0.5)(x)  # Adding Dropout after fc1 layer
 
         x = Dense(128, name='fc2')(x)
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.6)(x)  # Adding Dropout after fc2 layer
+        x = Dropout(0.5)(x)  # Adding Dropout after fc2 layer
 
         x = Dense(num_classes, activation='softmax', name='predictions')(x)
 
