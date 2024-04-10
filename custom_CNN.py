@@ -232,7 +232,7 @@ class CNN(neural_net_mixin):
 
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
-        x = Dropout(0.5)(x)
+        x = Dropout(0.6)(x)
 
 
         x = Conv2D(256, (4, 4),
@@ -242,7 +242,7 @@ class CNN(neural_net_mixin):
         x = BatchNormalization()(x)
         x = Activation('relu')(x)
         x = MaxPooling2D((3, 3), strides=(2, 2), name='block4_pool')(x)
-        x = Dropout(0.5)(x)
+        x = Dropout(0.6)(x)
 
 
         ##### regualr layers

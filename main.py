@@ -52,14 +52,14 @@ def delete_data(classes=['key_plates', 'other']):
 
 
 
-def pipeline(delete=False,process=False,aug=False,train=False):
+def pipeline(delete=False,process=False,aug=False,train_test=False):
 
     if delete:
         delete_data()
     if process:
         process_data(source=SOURCE,aug=aug,factor=FACTOR)
 
-    if train:
+    if train_test:
 
         if not DIM or len(DIM) < 3:
             raise ValueError
@@ -79,10 +79,10 @@ def pipeline(delete=False,process=False,aug=False,train=False):
             color_mode)
 
 
-        train_model_and_save(train_dataset, validation_dataset, test_dataset, class_names, num_classes)
+        train_test_model_and_save(train_dataset, validation_dataset, test_dataset, class_names, num_classes)
 
 
-def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_names, num_classes):
+def train_test_model_and_save(train_dataset, validation_dataset, test_dataset,class_names, num_classes):
 
     """
     train and eval CNN net
@@ -97,5 +97,5 @@ def train_model_and_save(train_dataset, validation_dataset, test_dataset,class_n
     CNN_net.save(f'{MODEL_NAME}.h5')
 
 
-pipeline(delete=True,process=True,aug=True,train=True)
+pipeline(delete=True,process=True,aug=True,train_test=True)
 
